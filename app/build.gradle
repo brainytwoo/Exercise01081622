@@ -42,5 +42,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     // Okhttp3
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    // JSON for unit tests
+    testImplementation 'org.json:json:20140107'
 
 }
