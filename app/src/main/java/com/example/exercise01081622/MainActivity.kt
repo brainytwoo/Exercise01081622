@@ -34,40 +34,19 @@ class MainActivity : AppCompatActivity() {
             // Process request
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-
+                    if (!it.isSuccessful) throw IOException("Unexpected code $it")
                     // Parse data
-                    val jsonItems = JSONArray(response.body!!.string())
-                    var itemArray: Array<Item> = emptyArray()
-                    for (i in 0 until jsonItems.length()) {
-                        val jsonItem = jsonItems.getJSONObject(i)
-                        itemArray += Item(
-                            jsonItem.getInt("id"),
-                            jsonItem.getInt("listId"),
-                            if (!jsonItem.isNull("name")) jsonItem.getString("name") else null
-                        )
-                    }
-
+                    var items = parseItems(it.body!!.string())
                     // Winnow data
-                    itemArray = winnowItems(itemArray)
-
+                    items = winnowItems(items)
                     // Update view
-                    runOnUiThread(Runnable {
-                        (recyclerView.adapter as ItemAdapter).setItems(itemArray)
+                    runOnUiThread {
+                        (recyclerView.adapter as ItemAdapter).setItems(items)
                         recyclerView.adapter?.notifyDataSetChanged()
-                    })
+                    }
                 }
             }
         })
-    }
-
-    private fun winnowItems(itemArray: Array<Item>): Array<Item> {
-        // Remove items with null or blank names
-        var winnowedItems = itemArray.filter { !it.name.isNullOrBlank() }
-        // Group items by listId then sort by name
-        winnowedItems = winnowedItems.sortedWith(compareBy({ it.listId }, { it.name }))
-        // Return winnowed array
-        return winnowedItems.toTypedArray()
     }
 }
 
